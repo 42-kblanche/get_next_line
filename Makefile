@@ -1,7 +1,9 @@
 NAME = gnl.test
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
-BUFF_SIZE = -D BUFFER_SIZE=100
+BUFF_SIZE = -D BUFFER_SIZE=42
+debug: DEBUG = -D DEBUG=1
+all: DEBUG =
 NEUTRAL = \033[0;0m
 RED = \033[0;31m
 YELLOW = \033[0;33m
@@ -14,6 +16,8 @@ OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
 
+debug: fclean $(NAME)
+
 re: fclean all
 
 $(NAME): $(OBJS)
@@ -21,7 +25,7 @@ $(NAME): $(OBJS)
 	@printf "${YELLOW}Building tests ${BLUE}$@\n${NEUTRAL}"
 
 %.o: %.c
-	@$(CC) $(CFLAGS) $(BUFF_SIZE) -o $@ -c $^
+	@$(CC) $(CFLAGS) $(BUFF_SIZE) ${DEBUG} -o $@ -c $^
 	@printf "Compiling ${BLUE}$^\n${NEUTRAL}"
 
 fclean: clean

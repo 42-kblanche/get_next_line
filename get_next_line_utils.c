@@ -6,7 +6,7 @@
 /*   By: kblanche <kblanche@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:02:34 by kblanche          #+#    #+#             */
-/*   Updated: 2025/11/24 22:46:15 by kblanche         ###   ########.fr       */
+/*   Updated: 2025/12/04 18:18:30 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ size_t	check_for_nl(char *s)
 	while (s[i])
 	{
 		if (s[i] == '\n')
-			return (1);
+			return (i + 1);
 		++i;
 	}
 	return (0);
@@ -58,6 +58,8 @@ int	concat(char **dest, char *src, size_t *dest_len)
 
 	i = ft_strlen(*dest, '\0');
 	l = ft_strlen(src, '\n');
+	if (src[l] == '\n')
+		l += 1;
 	if (i + l > *dest_len)
 	{
 		*dest_len = i + l;

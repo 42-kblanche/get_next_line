@@ -6,7 +6,7 @@
 /*   By: kblanche <kblanche@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 19:02:51 by kblanche          #+#    #+#             */
-/*   Updated: 2025/11/24 22:33:51 by kblanche         ###   ########.fr       */
+/*   Updated: 2025/12/04 19:32:10 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "debug.h"
+
+int	gnl_test(int fd)
+{
+	char	*s;
+
+	s = get_next_line(fd);
+	if (!s)
+	{
+		errors("LINE EMPTY");
+		return (0);
+	}
+	printf("%s", s);
+	//printf("%s%s%s", BLUE, s, NEUTRAL);
+	free(s);
+	return (1);
+}
 
 int	main(int argc, char **argv)
 {
 	int		fd;
 	int		i;
-	char	*s;
+	int		s;
 	char	*file;
 
 	if (argc != 2)
@@ -28,17 +45,13 @@ int	main(int argc, char **argv)
 	else
 		file = argv[1];
 	fd = open(file, O_RDONLY);
-	s = get_next_line(fd);
-	i = 0;
-	while (s && i < 10)
+	s = gnl_test(fd);
+	i = 1;
+	while (s && i < 50)
 	{
-		s = get_next_line(fd);
-		if (!s)
-			break ;
-		printf("%s", s);
+		s = gnl_test(fd);
 		++i;
 	}
 	close(fd);
-	free (s);
 	return (0);
 }

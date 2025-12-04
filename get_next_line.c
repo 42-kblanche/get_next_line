@@ -6,7 +6,7 @@
 /*   By: kblanche <kblanche@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 18:47:47 by kblanche          #+#    #+#             */
-/*   Updated: 2025/11/24 22:40:59 by kblanche         ###   ########.fr       */
+/*   Updated: 2025/12/04 19:20:12 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ static int	init_buffer(void)
 	}
 	return (1);
 }
+
 static ssize_t	refresh_buffer(int fd)
 {
 	ssize_t	read_err;
@@ -37,42 +38,64 @@ static ssize_t	refresh_buffer(int fd)
 	if (trim_len)
 	{
 		ft_memcpy(GB, GB + trim_len, ft_strlen(GB + trim_len, '\0') + 1);
+#ifdef DEBUG
+		debugs(GB);
+#endif /* ifdef DEBUG */
 		return (ft_strlen(GB, '\0'));
 	}
 	read_err = read(fd, g_buffer, BUFFER_SIZE);
+#ifdef DEBUG
+	debugs(GB);
+#endif /* ifdef DEBUG */
 	return (read_err);
 }
 
-char	*get_next_line(int fd)
+static int	get_next_line_loop(int fd, char **ret)
 {
 	int		has_nl;
-	char	*ret;
 	size_t	ret_len;
 	ssize_t	read_err;
 
-	if (!init_buffer())
-		return (NULL);
 	has_nl = 0;
-	ret = malloc(BUFFER_SIZE);
-	if (!ret)
-		return (NULL);
-	ret[0] = '\0';
 	ret_len = BUFFER_SIZE;
 	while (!has_nl)
 	{
 		read_err = refresh_buffer(fd);
 		if (read_err <= 1)
 		{
-			free(ret);
+			free(*ret);
 			free(g_buffer);
-			return (NULL);
+			return (0);
 		}
 		has_nl = check_for_nl(g_buffer);
-		if (!concat(&ret, g_buffer, &ret_len))
+		if (!concat(ret, g_buffer, &ret_len))
 		{
 			free(g_buffer);
-			return (NULL);
+			return (0);
 		}
+#ifdef DEBUG
+		debugs(*ret);
+#endif /* ifdef DEBUG */
 	}
-	return (ret);
+	return (1);
+}
+
+char	*get_next_line(int fd)
+{
+	char	*ret;
+
+	if (!init_buffer())
+		return (NULL);
+	ret = malloc(BUFFER_SIZE);
+	if (!ret)
+		return (NULL);
+	ret[0] = '\0';
+	if (get_next_line_loop(fd, &ret))
+	{
+#ifdef DEBUG
+		infos("END OF GNL CALL");
+#endif /* ifdef DEBUG */
+		return (ret);
+	}
+	return (NULL);
 }
