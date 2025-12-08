@@ -6,7 +6,7 @@
 /*   By: kblanche <kblanche@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 18:47:47 by kblanche          #+#    #+#             */
-/*   Updated: 2025/12/04 19:20:12 by kblanche         ###   ########.fr       */
+/*   Updated: 2025/12/08 18:07:04 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,33 +21,36 @@ static int	init_buffer(void)
 {
 	if (!g_buffer)
 	{
-		g_buffer = malloc(BUFFER_SIZE);
+		g_buffer = malloc(BUFFER_SIZE + 1);
 		if (!g_buffer)
 			return (0);
 		g_buffer[0] = '\0';
+		g_buffer[BUFFER_SIZE] = '\0';
 	}
 	return (1);
 }
 
 static ssize_t	refresh_buffer(int fd)
 {
-	ssize_t	read_err;
+	ssize_t	read_len;
 	size_t	trim_len;
 
-	trim_len = check_for_nl(g_buffer);
+	trim_len = check_for_nl(g_buffer + 1);
 	if (trim_len)
 	{
 		ft_memcpy(GB, GB + trim_len, ft_strlen(GB + trim_len, '\0') + 1);
 #ifdef DEBUG
-		debugs(GB);
+		debugs2(GB, "buffer wip");
 #endif /* ifdef DEBUG */
-		return (ft_strlen(GB, '\0'));
+		return (ft_strlen(g_buffer, '\0'));
 	}
-	read_err = read(fd, g_buffer, BUFFER_SIZE);
+	read_len = read(fd, g_buffer, BUFFER_SIZE);
+	if (read_len > 0)
+		g_buffer[read_len] = '\0';
 #ifdef DEBUG
-	debugs(GB);
+	debugs2(GB, "buffer final");
 #endif /* ifdef DEBUG */
-	return (read_err);
+	return (read_len);
 }
 
 static int	get_next_line_loop(int fd, char **ret)
@@ -61,7 +64,7 @@ static int	get_next_line_loop(int fd, char **ret)
 	while (!has_nl)
 	{
 		read_err = refresh_buffer(fd);
-		if (read_err <= 1)
+		if (read_err <= 0)
 		{
 			free(*ret);
 			free(g_buffer);
@@ -74,7 +77,7 @@ static int	get_next_line_loop(int fd, char **ret)
 			return (0);
 		}
 #ifdef DEBUG
-		debugs(*ret);
+		debugs2(*ret, "return");
 #endif /* ifdef DEBUG */
 	}
 	return (1);
@@ -84,12 +87,13 @@ char	*get_next_line(int fd)
 {
 	char	*ret;
 
-	if (!init_buffer())
+	if (BUFFER_SIZE <= 0 || !init_buffer())
 		return (NULL);
-	ret = malloc(BUFFER_SIZE);
+	ret = malloc(BUFFER_SIZE + 1);
 	if (!ret)
 		return (NULL);
 	ret[0] = '\0';
+	ret[BUFFER_SIZE] = '\0';
 	if (get_next_line_loop(fd, &ret))
 	{
 #ifdef DEBUG
@@ -97,5 +101,8 @@ char	*get_next_line(int fd)
 #endif /* ifdef DEBUG */
 		return (ret);
 	}
+#ifdef DEBUG
+		infos("END OF GNL CALL");
+#endif /* ifdef DEBUG */
 	return (NULL);
 }

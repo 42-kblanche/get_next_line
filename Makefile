@@ -1,7 +1,7 @@
 NAME = gnl.test
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
-BUFF_SIZE = -D BUFFER_SIZE=42
+BUFF_SIZE = -D BUFFER_SIZE=1
 debug: DEBUG = -D DEBUG=1
 all: DEBUG =
 NEUTRAL = \033[0;0m

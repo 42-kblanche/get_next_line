@@ -6,7 +6,7 @@
 /*   By: kblanche <kblanche@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:02:34 by kblanche          #+#    #+#             */
-/*   Updated: 2025/12/04 18:18:30 by kblanche         ###   ########.fr       */
+/*   Updated: 2025/12/08 18:48:47 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ int	concat(char **dest, char *src, size_t *dest_len)
 			return (0);
 		}
 		ft_memcpy(t, (*dest), i);
+		t[*dest_len] = '\0';
 		free((*dest));
 		(*dest) = t;
 	}
