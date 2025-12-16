@@ -6,7 +6,7 @@
 /*   By: kblanche <kblanche@42angouleme.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 19:02:51 by kblanche          #+#    #+#             */
-/*   Updated: 2025/12/04 19:32:10 by kblanche         ###   ########.fr       */
+/*   Updated: 2025/12/16 11:31:12 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ int	gnl_test(int fd)
 		errors("LINE EMPTY");
 		return (0);
 	}
+	infos("LINE READ:");
 	printf("%s", s);
 	//printf("%s%s%s", BLUE, s, NEUTRAL);
 	free(s);
