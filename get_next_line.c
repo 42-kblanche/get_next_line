@@ -3,100 +3,100 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kblanche <kblanche@42angouleme.fr>         +#+  +:+       +#+        */
+/*   By: kblanche <kblanche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 18:47:47 by kblanche          #+#    #+#             */
-/*   Updated: 2025/12/16 12:04:18 by kblanche         ###   ########.fr       */
+/*   Updated: 2026/01/29 04:42:34 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stddef.h>
 #include <unistd.h>
 #include <stdlib.h>
-#define GB g_buffer
-#define LOOP_RET_KO 0
-#define LOOP_RET_OK 1
-#define LOOP_RET_EOF 2
 
-static char	*g_buffer;
-
-static int	init_buffer(void)
+static int	concat(char **dest, char *src)
 {
-	if (!g_buffer)
-	{
-		g_buffer = malloc(BUFFER_SIZE + 1);
-		if (!g_buffer)
-			return (0);
-		g_buffer[0] = '\0';
-		g_buffer[BUFFER_SIZE] = '\0';
-	}
+	size_t	dest_len;
+	size_t	src_len;
+	char	*t;
+
+	if (!(*dest) || !src)
+		return (0);
+	dest_len = ft_strlen(*dest, '\0');
+	src_len = ft_strlen(src, '\0');
+	t = ft_calloc(dest_len + src_len + 1, sizeof(char));
+	if (!t)
+		return (0);
+	ft_memcpy(t, (*dest), dest_len);
+	ft_memcpy(t + dest_len, src, src_len);
+	free((*dest));
+	(*dest) = t;
 	return (1);
 }
 
-static ssize_t	refresh_buffer(int fd)
+static int	read_from_file(int fd, char **leftover)
 {
-	ssize_t	read_len;
-	size_t	trim_len;
+	char	*buf;
+	int		bytes_read;
 
-	trim_len = check_for_nl(g_buffer + 1);
-	if (trim_len)
+	if (!(*leftover))
 	{
-		ft_memcpy(GB, GB + trim_len, ft_strlen(GB + trim_len, '\0') + 1);
-		return (ft_strlen(g_buffer, '\0'));
+		*leftover = ft_calloc(1, sizeof(char));
 	}
-	read_len = read(fd, g_buffer, BUFFER_SIZE);
-	if (read_len >= 0)
-		g_buffer[read_len] = '\0';
-	return (read_len);
+	buf = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	bytes_read = 1;
+	while (bytes_read > 0 && !check_for_nl(*leftover))
+	{
+		bytes_read = read(fd, buf, BUFFER_SIZE);
+		if (bytes_read < 0)
+		{
+			free(buf);
+			free(*leftover);
+			*leftover = NULL;
+			return (bytes_read);
+		}
+		buf[bytes_read] = '\0';
+		concat(leftover, buf);
+	}
+	free(buf);
+	return (bytes_read);
 }
 
-static int	get_next_line_loop(int fd, char **ret)
+static char	*extract_line(char *leftover)
 {
-	int		has_nl;
-	size_t	ret_len;
-	ssize_t	read_err;
+	char	*ret;
+	size_t	i;
+	size_t	leftover_len;
 
-	has_nl = 0;
-	read_err = -1;
-	ret_len = BUFFER_SIZE;
-	while (!has_nl && read_err)
-	{
-		read_err = refresh_buffer(fd);
-		if (read_err < 0)
-		{
-			free(*ret);
-			return (LOOP_RET_KO);
-		}
-		has_nl = check_for_nl(g_buffer);
-		if (!concat(ret, g_buffer, &ret_len))
-			return (LOOP_RET_KO);
-	}
-	if (!read_err)
-		return (LOOP_RET_EOF);
-	return (LOOP_RET_OK);
+	if (!leftover[0])
+		return (NULL);
+	i = ft_strlen(leftover, '\n');
+	if (leftover[i] == '\n')
+		++i;
+	ret = ft_substr(leftover, i);
+	leftover_len = ft_strlen(leftover + i, '\0');
+	ft_memcpy(leftover, leftover + i, leftover_len);
+	leftover[leftover_len] = '\0';
+	return (ret);
 }
 
 char	*get_next_line(int fd)
 {
-	char	*ret;
-	int		loop_ret;
+	char		*ret;
+	static char	*leftover;
+	int			bytes_read;
 
-	if (BUFFER_SIZE <= 0 || !init_buffer())
+	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
-	ret = malloc(BUFFER_SIZE + 1);
-	if (!ret)
+	bytes_read = read_from_file(fd, &leftover);
+	if (leftover == NULL)
 		return (NULL);
-	ret[0] = '\0';
-	ret[BUFFER_SIZE] = '\0';
-	loop_ret = get_next_line_loop(fd, &ret);
-	if (loop_ret == LOOP_RET_OK)
-		return (ret);
-	else
+	ret = extract_line(leftover);
+	if (!ret && !bytes_read)
 	{
-		free(g_buffer);
-		if (loop_ret == LOOP_RET_EOF)
-			return (ret);
-		else
-			return (NULL);
+		free(leftover);
+		return (NULL);
 	}
+	return (ret);
 }

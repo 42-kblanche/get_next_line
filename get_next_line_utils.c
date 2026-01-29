@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kblanche <kblanche@42angouleme.fr>         +#+  +:+       +#+        */
+/*   By: kblanche <kblanche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 20:02:34 by kblanche          #+#    #+#             */
-/*   Updated: 2025/12/08 18:48:47 by kblanche         ###   ########.fr       */
+/*   Updated: 2026/01/29 04:06:08 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <stdlib.h>
+#include <limits.h>
 
 size_t	check_for_nl(char *s)
 {
@@ -50,30 +51,40 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 	return (dest);
 }
 
-int	concat(char **dest, char *src, size_t *dest_len)
+void	*ft_calloc(size_t nmemb, size_t size)
 {
-	size_t	i;
-	size_t	l;
-	char	*t;
+	unsigned char	*s;
+	size_t			i;
 
-	i = ft_strlen(*dest, '\0');
-	l = ft_strlen(src, '\n');
-	if (src[l] == '\n')
-		l += 1;
-	if (i + l > *dest_len)
+	s = 0;
+	i = 0;
+	if (nmemb != 0 && (UINT_MAX / nmemb < size))
+		return (s);
+	s = malloc(nmemb * size);
+	if (!s)
+		return (s);
+	while (i < nmemb * size)
 	{
-		*dest_len = i + l;
-		t = malloc(*dest_len + 1);
-		if (!t)
-		{
-			free((*dest));
-			return (0);
-		}
-		ft_memcpy(t, (*dest), i);
-		t[*dest_len] = '\0';
-		free((*dest));
-		(*dest) = t;
+		s[i] = 0;
+		++i;
 	}
-	ft_memcpy((*dest) + i, src, l);
-	return (1);
+	return ((void *)s);
+}
+
+char	*ft_substr(const char *s, size_t len)
+{
+	char	*ret;
+	size_t	i;
+
+	i = 0;
+	ret = ft_calloc(len + 1, sizeof(char));
+	if (!ret)
+		return (NULL);
+	while (i < len && s[i])
+	{
+		ret[i] = s[i];
+		++i;
+	}
+	ret[len] = '\0';
+	return (ret);
 }
