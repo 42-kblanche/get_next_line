@@ -3,3 +3,5 @@
 *.out
 *.swp
 *.test
+*.gch
+old

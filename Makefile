@@ -1,22 +1,18 @@
-NAME = gnl.test
+NAME = gnl_test
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g
 BUFF_SIZE = -D BUFFER_SIZE=1
-debug: DEBUG = -D DEBUG=1
-all: DEBUG =
 NEUTRAL = \033[0;0m
 RED = \033[0;31m
 YELLOW = \033[0;33m
 BLUE = \033[0;34m
 
 SRCS = get_next_line.c\
-	   gnl.c\
+	   gnl_test.c\
 	   get_next_line_utils.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
-
-debug: fclean $(NAME)
 
 re: fclean all
 
@@ -25,7 +21,7 @@ $(NAME): $(OBJS)
 	@printf "${YELLOW}Building tests ${BLUE}$@\n${NEUTRAL}"
 
 %.o: %.c
-	@$(CC) $(CFLAGS) $(BUFF_SIZE) ${DEBUG} -o $@ -c $^
+	@$(CC) $(CFLAGS) $(BUFF_SIZE) -o $@ -c $^
 	@printf "Compiling ${BLUE}$^\n${NEUTRAL}"
 
 fclean: clean
