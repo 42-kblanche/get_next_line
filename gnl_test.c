@@ -6,7 +6,7 @@
 /*   By: kblanche <kblanche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/29 01:16:22 by kblanche          #+#    #+#             */
-/*   Updated: 2026/01/29 04:52:45 by kblanche         ###   ########.fr       */
+/*   Updated: 2026/01/29 05:00:25 by kblanche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,9 @@ int	main(int argc, char **argv)
 	int		fd;
 
 	if (argc > 1)
-		fd = 0;
+		fd = open(argv[1], O_RDONLY);
 	else
-		fd = open("README.md", O_RDONLY);
+		fd = 0;
 	if (fd < 0)
 		return (fd);
 	line = get_next_line(fd);
@@ -33,6 +33,12 @@ int	main(int argc, char **argv)
 		printf("%s", line);
 		free(line);
 		line = get_next_line(fd);
+		if (line[0] == '!' && line[1] == 'q'
+			&& (line[2] == '\n' || line[2] == '\0'))
+		{
+			free(line);
+			line = NULL;
+		}
 	}
 	close(fd);
 	return (0);
